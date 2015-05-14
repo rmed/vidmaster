@@ -21,7 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from configparser import ConfigParser
 # from vidmaster.workbench import start_workbench
 from workbench import start_workbench
 import sys
@@ -33,9 +32,6 @@ if __name__ == "__main__":
         print("Usage: vidmaster.py <config file>")
         sys.exit()
 
-    config = ConfigParser(allow_no_value=True)
-    config.read(sys.argv[1])
-
-    workbench = start_workbench(config)
+    workbench = start_workbench(sys.argv[1])
 
     workbench.build()
