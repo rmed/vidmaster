@@ -60,17 +60,19 @@ class Workbench(object):
         final = CompositeVideoClip(comp_list, size=(self.width,self.height))
 
         # Concatenate intro/outro if any
-        if self.intro:
-            print("Adding intro/outro...")
-            inout = self.clips[self.intro]
-            final = concatenate_videoclips([inout, final, inout])
+        # if self.intro:
+            # print("Adding intro/outro...")
+            # inout = self.clips[self.intro]
+            # final = concatenate_videoclips([inout, final, inout])
 
         # Build the video
         print("Creating final video...")
         final.write_videofile(
             self.output,
             fps=self.fps,
-            codec=self.codec)
+            codec=self.codec,
+            # Modify these?
+            preset="ultrafast")
 
 def start_workbench(config):
     """ Initialize the workbench parsing the configuration file.
@@ -131,9 +133,14 @@ def start_workbench(config):
         duration = int(config[k]['duration']) if config.get(
             k, 'duration') else None
 
+        # Get effects for this clip
+        ieffects = [config[e] for e in config.keys() if e.strip().startswith(
+            'effect ' + k)]
+
         clip = build_image_clip(
             path=ipath,
-            duration=duration)
+            duration=duration,
+            effects=ieffects)
 
         wb.clips[k] = clip
 

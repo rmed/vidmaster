@@ -28,11 +28,12 @@ import moviepy.video.fx.all as vfx
 
 import os
 
-def build_image_clip(path, duration):
+def build_image_clip(path, duration, effects):
     """ Build a static image clip for composition with params:
 
-        path -- the path to the file
+        path     -- the path to the file
         duration -- duration in seconds
+        effects  -- list of effects to apply
 
         If no duration is specified, the clip will have infinite
         duration.
@@ -42,6 +43,22 @@ def build_image_clip(path, duration):
     print("Building clip for image file '%s'..." % path)
     # Base
     clip = ImageClip(path, duration=duration)
+
+    # Add effects
+    for e in effects:
+        print("Applying %s..." % e.name)
+
+        if e['type'] == 'margin':
+            clip = clip.fx(vfx.margin, mar=int(e['size']))
+
+        elif e['type'] == 'position':
+            clip = clip.set_position((int(e['x']),int(e['y'])))
+
+        elif e['type'] == 'resize':
+            clip = clip.fx(
+                vfx.resize,
+                height=int(e['height']),
+                width=int(e['width']))
 
     return clip
 
