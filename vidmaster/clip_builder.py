@@ -22,81 +22,114 @@
 # SOFTWARE.
 
 
+from moviepy.audio.io.AudioFileClip import AudioFileClip
+from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.video.VideoClip import ImageClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import moviepy.video.fx.all as vfx
 
 import os
 
-def build_image_clip(path, duration, effects):
-    """ Build a static image clip for composition with params:
 
-        path     -- the path to the file
-        duration -- duration in seconds
-        effects  -- list of effects to apply
+def define_audio(op):
+    """ Define an audio clip from source file.
 
-        If no duration is specified, the clip will have infinite
-        duration.
-
-        This is mainly used for intro/outro and static background
+        source - absolute path to the file
     """
-    print("Building clip for image file '%s'..." % path)
-    # Base
-    clip = ImageClip(path, duration=duration)
-
-    # Add effects
-    for e in effects:
-        print("Applying %s..." % e.name)
-
-        if e['type'] == 'margin':
-            clip = clip.fx(vfx.margin, mar=int(e['size']))
-
-        elif e['type'] == 'position':
-            clip = clip.set_position((int(e['x']),int(e['y'])))
-
-        elif e['type'] == 'resize':
-            clip = clip.fx(
-                vfx.resize,
-                height=int(e['height']),
-                width=int(e['width']))
+    clip = AudioFileClip(op.source)
 
     return clip
 
-def build_video_clip(path, audio, afps, start, end, effects):
-    """ Build a video clip for later composition with the following params:
+def define_image(op):
+    """ Define a static image clip from source file.
 
-        path    -- the path to the file
-        audio   -- whether the clip has audio or not
-        afps    -- fps of the audio clip
-        start   -- start of the clip
-        end     -- end of the clip
-        effects -- list of effects to apply
+        source   - absolute path to the file
+        duration - duration in seconds,**must** be specified
+            for composition to work.
 
-        start and end are used for defining the final subclip that will
-        be used for composition. If these values are not specified, all
-        the clip will be used
-
-        Returns a VideoFileClip object
+        Mainly used for intro/outro and static background.
     """
-    print("Building clip for video file '%s'..." % path)
-    # Base
-    clip = VideoFileClip(path, audio=audio, audio_fps=afps).subclip(
-        start or 0, end)
-
-    # Add effects
-    for e in effects:
-        print("Applying %s..." % e.name)
-
-        if e['type'] == 'margin':
-            clip = clip.fx(vfx.margin, mar=int(e['size']))
-
-        elif e['type'] == 'position':
-            clip = clip.set_position((int(e['x']),int(e['y'])))
-
-        elif e['type'] == 'resize':
-            clip = clip.fx(
-                vfx.resize,
-                height=int(e['height']),
-                width=int(e['width']))
+    clip = ImageClip(op.source, duration=op.duration)
 
     return clip
+
+def define_video(op):
+    """ Define a video clip from source file.
+
+        source   - absolute path to the file
+        hasaudio - whether the clip has its own audio or not
+    """
+    clip = VideoFileClip(op.source, audio=op.hasaudio)
+
+    return clip
+
+def do_concatenate(clips):
+    """ Concatenate clips into one.
+
+        clips - ordered list of clips to concatenate
+    """
+    result = concatenate_videoclips(clips)
+
+    return result
+
+def do_composite(clips, height, width):
+    """ Create a composition of clips.
+
+        clips  - list of clips to composite ordered by layer
+        height - height of the final composition
+        width  - width of the final composition
+    """
+    result = CompositeVideoClip(clips, size=(width, height))
+
+    return result
+
+def effect_margin(clip, op):
+    """ Add a margin to a clip (video or image).
+
+        clip    - clip to apply the effect to
+        size    - size of the margin
+        opacity - opacity of the clip
+        red     - amount of red for the color of the margin
+        green   - amount of green for the color of the margin
+        blue    - amount of blue for the color of the margin
+    """
+    result = clip.fx(vfx.margin, mar=op.size,
+            color=(op.red, op.green, op.blue), opacity=op.opacity)
+
+    return result
+
+def effect_position(clip, op):
+    """ Apply a position effect to a clip (video or image).
+
+        clip - clip to apply the effect to
+        x    - new X position for the clip
+        y    - new Y position for the clip
+    """
+    result = clip.set_position(op.x, op.y)
+
+    return result
+
+def effect_resize(clip, op):
+    """ Apply a resize effect to a clip (video or image).
+
+        clip   - clip to apply the effect to
+        height - new height for the clip
+        width  - new width for the clip
+    """
+    result = clip.fx(vfx.resize, height=op.height, width=op.width)
+
+    return result
+
+def export_video(clip, out, fps, codec):
+    """ Export the clip to a file.
+
+        clip   - clip to export
+        out    - absolute path to the resulting file
+        fps    - frames per second for the video
+        codec  - codec to use for encoding
+    """
+    clip.write_videofile(
+            out,
+            fps=fps,
+            codec=codec)

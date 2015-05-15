@@ -22,44 +22,13 @@
 # SOFTWARE.
 
 import os
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
-from moviepy.video.compositing.concatenate import concatenate_videoclips
 # from vidmaster.clip_builder import build_image_clip, build_video_clip
-from clip_builder import build_image_clip, build_video_clip
+from clip_builder import define_audio, define_image, define_video
+from clip_builder import do_concatenate, do_composite, export_video
+from clip_builder import effect_margin, effect_position, effect_resize
+from parser import OpDefine, OpEffect, OpMix, OpExport
 from parser import parse_block
 
-
-# class Workbench(object):
-
-#     def __init__(self):
-#         # Metadata
-#         self.title = None
-#         self.desc = None
-#         self.fps = 0
-#         self.height = 0
-#         self.width = 0
-#         self.output = None
-#         self.codec = None
-
-#         # Intro/outro
-#         self.intro = None
-
-#         # Clips
-#         self.clips = {}
-
-#         # Composition layers
-#         self.composition = []
-
-#     def build(self):
-#         """ Build the final video. """
-#         # Create main composition
-#         print("Creating main composition...")
-
-#         comp_list = []
-#         for c in self.composition:
-#             comp_list.append(self.clips[c])
-
-#         final = CompositeVideoClip(comp_list, size=(self.width,self.height))
 
 #         # Concatenate intro/outro if any
 #         # if self.intro:
@@ -81,6 +50,66 @@ class Workbench(object):
     def __init__(self, ops=[], clips={}):
         self.ops = ops
         self.clips = clips
+
+    def do_ops(self):
+        """ Perform the operations stored. """
+        for op in self.ops:
+
+            if type(op) == OpDefine:
+
+                if op.type == 'audio':
+                    self.clips[op.name] = define_audio(op)
+
+                elif op.type == 'image':
+                    self.clips[op.name] = define_image(op)
+
+                elif op.type == 'video':
+                    self.clips[op.name] = define_video(op)
+
+                else:
+                    raise Exception("Unknown definition type")
+
+            elif type(op) == OpEffect:
+
+                if op.type == 'margin':
+                    self.clips[op.out] = effect_margin(
+                            self.clips[op.clip], op)
+
+                elif op.type == 'position':
+                    self.clips[op.out] = effect_position(
+                            self.clips[op.clip], op)
+
+                elif op.type == 'resize':
+                    self.clips[op.out] = effect_resize(
+                            self.clips[op.clip], op)
+
+                else:
+                    raise Exception("Unknown effect type")
+
+            elif type(op) == OpMix:
+
+                affected = []
+                for c in op.clips:
+                    affected.append(self.clips[c])
+
+                if op.type == 'concatenation':
+                    self.clips[op.out] = do_concatenate(affected)
+
+                elif op.type == 'composition':
+                    self.clips[op.out] = do_composite(affected,
+                            op.height, op.width)
+
+                else:
+                    raise Exception("Unknown mix type")
+
+            elif type(op) == OpExport:
+                # This is the final operation
+                export_video(self.clips[op.clip], op.out,
+                        out.fps, out.codec)
+                return
+
+            else:
+                raise Exception("Unknown operation type")
 
 
 def start_workbench(script):
@@ -109,90 +138,12 @@ def start_workbench(script):
             # Read all the block
             while not line.startswith('#end') and file_lines:
                 line = file_lines.pop(0)
+
                 if not line or line.startswith('//'):
                     continue
+
                 block.append(line)
 
             wb.ops.append(parse_block(block))
 
     return wb
-
-# def start_workbench(config):
-#     """ Initialize the workbench parsing the configuration file.
-
-#         This will return a Workbench object that includes all the clips,
-#         effects, transitions, etc. applied.
-#     """
-#     wb = Workbench()
-
-#     # Gather metadata
-#     info = config['info']
-
-#     wb.title = info['title']
-#     wb.desc = config.get('info' ,'description')
-#     wb.fps = int(info['fps'])
-#     wb.height = int(info['height'])
-#     wb.width = int(info['width'])
-#     wb.output = info['output']
-#     wb.codec = config.get('info', 'codec')
-
-#     # Build video clips
-#     vclips = config['video-clips']
-
-#     for k in vclips:
-#         # Get path
-#         cpath = vclips[k]
-
-#         # Get info for this clip
-#         audio = config.getboolean(k, 'audio')
-#         # vfps = int(vclips[k]['vfps'])
-#         afps = int(config[k]['afps']) if config.get(k, 'afps') else None
-#         start = config.get(k, 'start')
-#         end = config.get(k, 'end')
-
-#         # Get effects for this clip
-#         ceffects = [config[e] for e in config.keys() if e.strip().startswith(
-#             'effect ' + k)]
-
-#         # Build clip
-#         clip = build_video_clip(
-#             path=cpath,
-#             audio=audio,
-#             afps=afps,
-#             start=start,
-#             end=end,
-#             effects=ceffects)
-
-#         wb.clips[k] = clip
-
-#     # Build image clips
-#     iclips = config['images']
-
-#     for k in iclips:
-#         # Get path
-#         ipath = iclips[k]
-
-#         # Get duration info
-#         duration = int(config[k]['duration']) if config.get(
-#             k, 'duration') else None
-
-#         # Get effects for this clip
-#         ieffects = [config[e] for e in config.keys() if e.strip().startswith(
-#             'effect ' + k)]
-
-#         clip = build_image_clip(
-#             path=ipath,
-#             duration=duration,
-#             effects=ieffects)
-
-#         wb.clips[k] = clip
-
-#         is_intro = config.getboolean(k, 'intro')
-#         if is_intro:
-#             wb.intro = k
-
-#     # Obtain composition layers (list)
-#     layers = config['composition']['layers'].split(' ')
-#     wb.composition = layers
-
-#     return wb

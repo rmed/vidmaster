@@ -26,7 +26,7 @@ import re
 # REGEX_VAR = re.compile('(\w+)\s*=\s*(\w+)')
 REGEX_VAR = re.compile('(\w+)\s*=\s*([a-zA-Z0-9_\/]+)')
 BOOL_VARS = ['hasaudio']
-INT_VARS = ['duration', 'height', 'width', 'x', 'y', 'size',
+INT_VARS = ['duration', 'height', 'width', 'x', 'y', 'size', 'opacity',
     'red', 'green', 'blue', 'fps']
 
 
@@ -69,10 +69,11 @@ class OpEffect(object):
                 y - new y position for the clip
 
             Margin:
-                size  - size of the margin
-                red   - red color in RGB (0-255)
-                green - green color in RGB (0-255)
-                blue  - blue color in RGB (0-255)
+                size    - size of the margin
+                opacity - opacity of the margin (0-1)
+                red     - red color in RGB (0-255)
+                green   - green color in RGB (0-255)
+                blue    - blue color in RGB (0-255)
         """
         self.clip = kwargs['clip']
         self.type = kwargs['type']
@@ -85,6 +86,7 @@ class OpEffect(object):
         self.y = kwargs.get('y', None)
 
         self.size = kwargs.get('size', None)
+        self.opacity = kwargs.get('opacity', None)
         self.red = kwargs.get('red', None)
         self.green = kwargs.get('green', None)
         self.blue = kwargs.get('blue', None)
@@ -96,14 +98,23 @@ class OpMix(object):
     def __init__(self, **kwargs):
         """ Support for concatenation or composition.
 
+            type  - concatenation or composition
             clips - ordered list of affected clips.
                 In the case of concatenation, represents the order,
                 while for composition represents the layers (0 is left)
 
             out   - output clip (overwrites)
+
+            For composition:
+                height - height of the final composition
+                width  - width of the final composition
         """
-        self.clips = kwargs['clips']
+        self.type = kwargs['type']
+        self.clips = kwargs['clips'].split()
         self.out = kwargs['out']
+
+        self.height = kwargs.get('height', None)
+        self.width = kwargs.get('width', None)
 
 
 class OpExport(object):
@@ -115,15 +126,11 @@ class OpExport(object):
             clip   - input clip (usually final composition)
             out    - absolute path for the output file
             fps    - fps value for the final video
-            height - height of the final video
-            width  - width of the final video
             codec  - codec to use for the final video
         """
         self.clip = kwargs['clip']
         self.out = kwargs['out']
         self.fps = kwargs['fps']
-        self.height = kwargs['height']
-        self.width = kwargs['width']
         self.codec = kwargs['codec']
 
 
@@ -139,6 +146,9 @@ def get_val(var, val):
 
         elif val == "0":
             return False
+
+        else:
+            raise Exception("Invalid boolean value")
 
     elif var in INT_VARS:
         # Integer
