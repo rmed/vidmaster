@@ -84,6 +84,28 @@ def do_composite(clips, height, width):
 
     return result
 
+def do_set_audio(clip, audio):
+    """ Set the audio of a video clip.
+
+        clip  - clip in which to set the audio
+        audio - audio clip to use as audio
+    """
+    result = clip.set_audio(audio)
+
+    return result
+
+def do_subclip(clip, op):
+    """ Create a subclip.
+
+        clip - original clip to create a subclip from
+        start - timestamp indicating start of the clip
+        end - timestamp indicating end of the clip, or None in order
+            to use end of original clip
+    """
+    result = clip.subclip(op.start, op.end)
+
+    return result
+
 def effect_margin(clip, op):
     """ Add a margin to a clip (video or image).
 
@@ -121,7 +143,7 @@ def effect_resize(clip, op):
 
     return result
 
-def export_video(clip, out, fps, codec):
+def export_video(clip, op):
     """ Export the clip to a file.
 
         clip   - clip to export
@@ -130,6 +152,6 @@ def export_video(clip, out, fps, codec):
         codec  - codec to use for encoding
     """
     clip.write_videofile(
-            out,
-            fps=fps,
-            codec=codec)
+            op.out,
+            fps=op.fps,
+            codec=op.codec)

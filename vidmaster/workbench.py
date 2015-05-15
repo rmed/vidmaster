@@ -22,7 +22,6 @@
 # SOFTWARE.
 
 import os
-# from vidmaster.clip_builder import build_image_clip, build_video_clip
 from clip_builder import define_audio, define_image, define_video
 from clip_builder import do_concatenate, do_composite, export_video
 from clip_builder import effect_margin, effect_position, effect_resize
@@ -30,29 +29,14 @@ from parser import OpDefine, OpEffect, OpMix, OpExport
 from parser import parse_block
 
 
-#         # Concatenate intro/outro if any
-#         # if self.intro:
-#             # print("Adding intro/outro...")
-#             # inout = self.clips[self.intro]
-#             # final = concatenate_videoclips([inout, final, inout])
-
-#         # Build the video
-#         print("Creating final video...")
-#         final.write_videofile(
-#             self.output,
-#             fps=self.fps,
-#             codec=self.codec,
-#             # Modify these?
-#             preset="ultrafast")
-
 class Workbench(object):
 
     def __init__(self, ops=[], clips={}):
         self.ops = ops
         self.clips = clips
 
-    def do_ops(self):
-        """ Perform the operations stored. """
+    def build(self):
+        """ Perform the operations stored and build the final video. """
         for op in self.ops:
 
             if type(op) == OpDefine:
@@ -92,7 +76,12 @@ class Workbench(object):
                 for c in op.clips:
                     affected.append(self.clips[c])
 
-                if op.type == 'concatenation':
+                if op.type == 'audio':
+                    self.clips[op.out] = do_set_audio(
+                            self.clips[op.clip],
+                            self.clips[op.audio])
+
+                elif op.type == 'concatenation':
                     self.clips[op.out] = do_concatenate(affected)
 
                 elif op.type == 'composition':
@@ -104,9 +93,11 @@ class Workbench(object):
 
             elif type(op) == OpExport:
                 # This is the final operation
-                export_video(self.clips[op.clip], op.out,
-                        out.fps, out.codec)
+                export_video(self.clips[op.clip], op)
                 return
+
+            elif type(op) == OpSubclip:
+                self.clips[op.out] = do_subclip(self.clips[op.clip], op)
 
             else:
                 raise Exception("Unknown operation type")

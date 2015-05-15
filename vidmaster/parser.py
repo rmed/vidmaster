@@ -96,9 +96,9 @@ class OpMix(object):
     """ Mix clips. """
 
     def __init__(self, **kwargs):
-        """ Support for concatenation or composition.
+        """ Support for concatenation, composition or mixing audio and video.
 
-            type  - concatenation or composition
+            type  - concatenation, composition or audio
             clips - ordered list of affected clips.
                 In the case of concatenation, represents the order,
                 while for composition represents the layers (0 is left)
@@ -108,6 +108,9 @@ class OpMix(object):
             For composition:
                 height - height of the final composition
                 width  - width of the final composition
+
+            For audio mixing:
+                audio - audio clip to use for the video
         """
         self.type = kwargs['type']
         self.clips = kwargs['clips'].split()
@@ -116,6 +119,7 @@ class OpMix(object):
         self.height = kwargs.get('height', None)
         self.width = kwargs.get('width', None)
 
+        self.audio = kwargs.get('audio', None)
 
 class OpExport(object):
     """ Final export. There can be only one object of this class. """
@@ -132,6 +136,26 @@ class OpExport(object):
         self.out = kwargs['out']
         self.fps = kwargs['fps']
         self.codec = kwargs['codec']
+
+
+class OpSubclip(object):
+    """ Create a subclip from the video. """
+
+    def __init__(self, **kwargs):
+        """ Params:
+
+            clip - clip to extract a subclip from
+            start - timestamp indicating start of the subclip
+            end - timestamp indicating end of the subclip. If empty, will
+                use end of the original clip.
+            out - output clip (overwrites)
+
+            Timestamp has the following format: 01:03:05.35
+        """
+        self.clip = kwargs['clip']
+        self.start = kwargs['start']
+        self.end = kwargs.get('end', None)
+        self.out = kwargs['out']
 
 
 def get_val(var, val):
