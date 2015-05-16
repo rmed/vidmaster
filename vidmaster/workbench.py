@@ -23,9 +23,10 @@
 
 import os
 from clip_builder import define_audio, define_image, define_video
-from clip_builder import do_concatenate, do_composite, export_video
+from clip_builder import do_concatenate, do_composite, do_subclip, do_set_audio
 from clip_builder import effect_margin, effect_position, effect_resize
-from parser import OpDefine, OpEffect, OpMix, OpExport
+from clip_builder import export_video
+from parser import OpDefine, OpEffect, OpMix, OpSubclip, OpExport
 from parser import parse_block
 
 
@@ -45,7 +46,12 @@ class Workbench(object):
                     self.clips[op.name] = define_audio(op)
 
                 elif op.type == 'image':
-                    self.clips[op.name] = define_image(op)
+                    if op.duration:
+                        self.clips[op.name] = define_image(op)
+
+                    else:
+                        self.clips[op.name] = define_image(op,
+                                self.clips[op.duration_from])
 
                 elif op.type == 'video':
                     self.clips[op.name] = define_video(op)
@@ -76,7 +82,7 @@ class Workbench(object):
                 for c in op.clips:
                     affected.append(self.clips[c])
 
-                if op.type == 'audio':
+                if op.type == 'setaudio':
                     self.clips[op.out] = do_set_audio(
                             self.clips[op.clip],
                             self.clips[op.audio])

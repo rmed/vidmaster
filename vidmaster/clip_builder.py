@@ -25,6 +25,7 @@
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
+from moviepy.video.tools.cuts import find_video_period
 from moviepy.video.VideoClip import ImageClip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import moviepy.video.fx.all as vfx
@@ -41,16 +42,21 @@ def define_audio(op):
 
     return clip
 
-def define_image(op):
+def define_image(op, ext_duration=None):
     """ Define a static image clip from source file.
 
         source   - absolute path to the file
-        duration - duration in seconds,**must** be specified
-            for composition to work.
+        duration - duration in seconds
+        ext_duration - clip to obtain the duration from
 
         Mainly used for intro/outro and static background.
     """
-    clip = ImageClip(op.source, duration=op.duration)
+    if ext_duration:
+        # clip = ImageClip(op.source, duration=find_video_period(ext_duration))
+        clip = ImageClip(op.source, duration=ext_duration.duration)
+
+    else:
+        clip = ImageClip(op.source, duration=op.duration)
 
     return clip
 
@@ -128,7 +134,7 @@ def effect_position(clip, op):
         x    - new X position for the clip
         y    - new Y position for the clip
     """
-    result = clip.set_position(op.x, op.y)
+    result = clip.set_position((op.x, op.y))
 
     return result
 

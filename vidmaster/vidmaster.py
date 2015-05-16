@@ -33,6 +33,5 @@ if __name__ == "__main__":
         sys.exit()
 
     workbench = start_workbench(sys.argv[1])
-    print(workbench.ops)
 
-    # workbench.build()
+    workbench.build()

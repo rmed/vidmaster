@@ -24,10 +24,11 @@
 import re
 
 # REGEX_VAR = re.compile('(\w+)\s*=\s*(\w+)')
-REGEX_VAR = re.compile('(\w+)\s*=\s*([a-zA-Z0-9_\/]+)')
+REGEX_VAR = re.compile('(\w+)\s*=\s*([a-zA-Z0-9_\/.:\s]+)')
 BOOL_VARS = ['hasaudio']
 INT_VARS = ['duration', 'height', 'width', 'x', 'y', 'size', 'opacity',
     'red', 'green', 'blue', 'fps']
+TIME_VARS = ['start', 'end']
 
 
 class OpDefine(object):
@@ -40,14 +41,22 @@ class OpDefine(object):
             type     - video, audio or image [required]
             source   - absolute path of the source file [required]
             hasaudio - (for video only), whether a clip has audio or not
-            duration - duration of the clip
+
+            For image clips:
+                duration      - duration of the clip
+                duration_from - set the duration based on the duration
+                    of another video clip
+
+                Priority is given to the duration parameter.
         """
         self.name = kwargs['name']
         self.type = kwargs['type']
         self.source = kwargs['source']
 
         self.hasaudio = kwargs.get('hasaudio', False)
+
         self.duration = kwargs.get('duration', None)
+        self.duration_from = kwargs.get('duration_from', None)
 
 
 class OpEffect(object):
@@ -113,12 +122,13 @@ class OpMix(object):
                 audio - audio clip to use for the video
         """
         self.type = kwargs['type']
-        self.clips = kwargs['clips'].split()
+        self.clips = kwargs.get('clips', "").split()
         self.out = kwargs['out']
 
         self.height = kwargs.get('height', None)
         self.width = kwargs.get('width', None)
 
+        self.clip = kwargs.get('clip', None)
         self.audio = kwargs.get('audio', None)
 
 class OpExport(object):
@@ -178,6 +188,11 @@ def get_val(var, val):
         # Integer
         return int(val)
 
+    elif var in TIME_VARS:
+        # Timestamp
+        t = val.split(':')
+        return (int(t[0]), int(t[1]), int(t[2]))
+
     # Regular string
     return val
 
@@ -212,11 +227,14 @@ def parse_block(lines):
     elif btype in ['resize', 'position', 'margin']:
         return parse_effect(lines, btype)
 
-    elif btype in ['concatenate', 'composition']:
+    elif btype in ['concatenate', 'composition', 'setaudio']:
         return parse_mix(lines, btype)
 
     elif btype == 'export':
         return parse_export(lines)
+
+    elif btype == 'subclip':
+        return parse_subclip(lines)
 
 def parse_define(lines):
     """ Parse a clip definition.
@@ -257,3 +275,12 @@ def parse_mix(lines, btype):
     kwargs['type'] = btype
 
     return OpMix(**kwargs)
+
+def parse_subclip(lines):
+    """ Parse a subclip.
+
+        Returns an OpSubclip object.
+    """
+    kwargs = fill_dict(lines)
+
+    return OpSubclip(**kwargs)
