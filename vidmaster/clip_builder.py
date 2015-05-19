@@ -160,4 +160,7 @@ def export_video(clip, op):
     clip.write_videofile(
             op.out,
             fps=op.fps,
-            codec=op.codec)
+            codec=op.codec,
+            preset=op.preset,
+            threads=op.threads,
+            ffmpeg_params=op.params)

@@ -27,7 +27,7 @@ import re
 REGEX_VAR = re.compile('(\w+)\s*=\s*([a-zA-Z0-9_\/.:\s]+)')
 BOOL_VARS = ['hasaudio']
 INT_VARS = ['duration', 'height', 'width', 'x', 'y', 'size', 'opacity',
-    'red', 'green', 'blue', 'fps']
+    'red', 'green', 'blue', 'fps', 'threads']
 TIME_VARS = ['start', 'end']
 
 
@@ -137,15 +137,22 @@ class OpExport(object):
     def __init__(self, **kwargs):
         """ Should be last operation performed.
 
-            clip   - input clip (usually final composition)
-            out    - absolute path for the output file
-            fps    - fps value for the final video
-            codec  - codec to use for the final video
+            clip    - input clip (usually final composition)
+            out     - absolute path for the output file
+            fps     - fps value for the final video
+            codec   - codec to use for the final video
+            preset  - FFMPEG compression preset:
+                ultrafast, superfast, fast, medium, slow, superslow.
+            threads - number of threads to use for ffmpeg
+            params  - additional params for FFMPEG
         """
         self.clip = kwargs['clip']
         self.out = kwargs['out']
         self.fps = kwargs['fps']
         self.codec = kwargs['codec']
+        self.preset = kwargs.get('preset', 'medium')
+        self.threads = kwargs.get('threads', None)
+        self.params = kwargs.get('params', "").split()
 
 
 class OpSubclip(object):
