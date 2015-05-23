@@ -29,7 +29,7 @@ import sys
 # Can also be executed independently
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: vidmaster.py <config file>")
+        print("Usage: vidmaster.py <video script file>")
         sys.exit()
 
     workbench = start_workbench(sys.argv[1])
