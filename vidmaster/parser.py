@@ -132,10 +132,10 @@ class OpMix(object):
         self.audio = kwargs.get('audio', None)
 
 class OpExport(object):
-    """ Final export. There can be only one object of this class. """
+    """ Export a clip to a file """
 
     def __init__(self, **kwargs):
-        """ Should be last operation performed.
+        """ There may be several exports in a script.
 
             clip    - input clip (usually final composition)
             out     - absolute path for the output file
@@ -167,7 +167,7 @@ class OpSubclip(object):
                 use end of the original clip.
             out - output clip (overwrites)
 
-            Timestamp has the following format: 01:03:05.35
+            Timestamp has the following format: 01:03:05
         """
         self.clip = kwargs['clip']
         self.start = kwargs['start']
