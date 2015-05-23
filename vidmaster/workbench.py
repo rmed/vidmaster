@@ -98,9 +98,7 @@ class Workbench(object):
                     raise Exception("Unknown mix type")
 
             elif type(op) == OpExport:
-                # This is the final operation
                 export_video(self.clips[op.clip], op)
-                return
 
             elif type(op) == OpSubclip:
                 self.clips[op.out] = do_subclip(self.clips[op.clip], op)
