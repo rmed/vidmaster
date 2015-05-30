@@ -21,8 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# from vidmaster.workbench import start_workbench
-from workbench import start_workbench
+from vidmaster.workbench import start_workbench
+# from workbench import start_workbench
 import sys
 
 

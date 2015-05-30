@@ -22,12 +22,12 @@
 # SOFTWARE.
 
 import os
-from clip_builder import define_audio, define_image, define_video
-from clip_builder import do_concatenate, do_composite, do_subclip, do_set_audio
-from clip_builder import effect_margin, effect_position, effect_resize
-from clip_builder import export_video
-from parser import OpDefine, OpEffect, OpMix, OpSubclip, OpExport
-from parser import parse_block
+from vidmaster.clip_builder import define_audio, define_image, define_video
+from vidmaster.clip_builder import do_concatenate, do_composite, do_subclip, do_set_audio
+from vidmaster.clip_builder import effect_margin, effect_position, effect_resize
+from vidmaster.clip_builder import export_video
+from vidmaster.parser import OpDefine, OpEffect, OpMix, OpSubclip, OpExport
+from vidmaster.parser import parse_block
 
 
 class Workbench(object):
