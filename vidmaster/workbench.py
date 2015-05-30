@@ -35,6 +35,7 @@ class Workbench(object):
     def __init__(self, ops=[], clips={}):
         self.ops = ops
         self.clips = clips
+        self.final = None
 
     def build(self):
         """ Perform the operations stored and build the final video. """
@@ -139,6 +140,11 @@ def start_workbench(script):
 
                 block.append(line)
 
-            wb.ops.append(parse_block(block))
+            parsed = parse_block(block)
+
+            if type(parsed) == OpExport:
+                wb.final = parsed.out
+
+            wb.ops.append(parsed)
 
     return wb
