@@ -1,4 +1,4 @@
-# vidmaster
+# vidmaster [![PyPI version](https://img.shields.io/pypi/v/vidmaster.svg)](https://pypi.python.org/pypi/vidmaster)
 
 This script aims to automate the video compositions for the [GULUC3M](http://gul.es) talks.
 
@@ -6,7 +6,7 @@ This script aims to automate the video compositions for the [GULUC3M](http://gul
 
 ## Dependencies
 
-vidmaster depends on [MoviePy](https://github.com/Zulko/moviepy), install with pip (plus its dependencies):
+vidmaster depends on [MoviePy](https://github.com/Zulko/moviepy), if you are installing manually, run:
 
 ```
 $ pip install moviepy
@@ -16,6 +16,20 @@ MoviePy uses FFmpeg for its operations. If for some reason FFmpeg is not availab
 
 Due to `imageio` limitations, this will not work on Raspberry Pi automatically, so you may have to compile FFmpeg and modify some configurations
 
+## Installation
+
+vidmaster is available in the Package Index, simply run:
+
+```
+$ pip install vidmaster
+```
+
+to install vidmaster and its dependencies or download the source and run:
+
+```
+$ python setup.py install
+```
+
 ## Usage
 
 You can use vidmaster in two ways:
@@ -23,7 +37,7 @@ You can use vidmaster in two ways:
 - As an independent program:
 
 ```
-python vidmaster/vidmaster.py <video script file>
+$ vidmaster <video script file>
 ```
 
 - As a Python module:
@@ -32,7 +46,6 @@ python vidmaster/vidmaster.py <video script file>
 from vidmaster.workbench import start_workbench
 import sys
 
-# Can also be executed independently
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: vidmaster.py <video script file>")

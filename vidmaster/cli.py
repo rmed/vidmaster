@@ -22,12 +22,9 @@
 # SOFTWARE.
 
 from vidmaster.workbench import start_workbench
-# from workbench import start_workbench
 import sys
 
-
-# Can also be executed independently
-if __name__ == "__main__":
+def main():
     if len(sys.argv) != 2:
         print("Usage: vidmaster.py <video script file>")
         sys.exit()
